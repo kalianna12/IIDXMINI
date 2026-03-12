@@ -3,25 +3,30 @@
 #include "wifi_config.h" 
 #include "ntp_time.h"
 #include "weather.h"
+
 Adafruit_ST7789 tft(TFT_CS, TFT_DC, TFT_RST);  // 这是硬件SPI路径
 U8G2_FOR_ADAFRUIT_GFX u8g2;//创建字库
 //Adafruit_ST7789::Adafruit_ST7789(int8_t cs, int8_t dc, int8_t mosi, int8_t sclk,
 //                                 int8_t rst)
 void display_init() {
     SPI.begin(12, -1, 11, 10);  // SCLK, MISO, MOSI, SS
-    u8g2.begin(tft);
-    
     tft.init(240, 320, SPI_MODE0); // 初始化显示屏，设置分辨率和SPI模式
     tft.setRotation(3); // 设置显示屏旋转方向
-    tft.setSPISpeed(40000000);    // 设置SPI速度，单位为Hz，具体值根据显示屏和ESP32的性能调整
-    tft.fillScreen(ST77XX_BLACK); // 清屏，设置背景色为黑色
-    tft.setTextColor(ST77XX_WHITE); // 设置文本颜色为白色
-    tft.setTextSize(2);
-    tft.setCursor(0, 10);
-    tft.println("ST7789 240x320 OK");
+    tft.setSPISpeed(80000000);    // 设置SPI速度，单位为Hz，具体值根据显示屏和ESP32的性能调整,实际320*240横屏
+    tft.fillScreen(ST77XX_WHITE); // 清屏，设置背景色为黑色
     delay(500);
 }
 
+#if LVGL_ON
+
+// When LVGL is enabled, the TFT animation/drawing helpers are no-ops.
+// They are kept to satisfy references from the main application.
+bool display_startani() { return true; }
+void display_drawlines() {}
+void display_time() {}
+void display_weather() {}
+
+#else
 void display_drawlines()
 {static bool is_draw_lines=false;
   if(!is_draw_lines){
@@ -618,3 +623,4 @@ bool display_startani() {
 
   return false;
 }
+#endif

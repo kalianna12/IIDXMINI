@@ -16,14 +16,14 @@ uint32_t last_colon_ms = 0;
 void init_ntp_time() {
     if(WiFi.status()!=WL_CONNECTED)
     {
-        tft.println("ntp_time not ready");
+        //tft.println("ntp_time not ready");
         return;
     }
     // 配置 NTP 服务器和时区
     configTime(gmtOffset_sec, daylightOffset_sec, ntpServer, "ntp.aliyun.com");
     
     Serial0.println("Waiting for NTP time sync...");
-    tft.println("NTP time sync...");
+    //tft.println("NTP time sync...");
     
     // 等待时间同步（最多等待10秒）
     struct tm timeinfo;
@@ -36,14 +36,14 @@ void init_ntp_time() {
 
     if (retry < 10) {
         Serial0.println("\nTime synchronized successfully!");
-        tft.println("ntp_time ready");
+        //tft.println("ntp_time ready");
         // 打印当前时间
         Serial0.println(&timeinfo, "%Y-%m-%d %H:%M:%S");
-        tft.println(&timeinfo, "%Y-%m-%d %H:%M:%S");
+        //tft.println(&timeinfo, "%Y-%m-%d %H:%M:%S");
         is_ntp_time_ready=true;
     } else {
         Serial0.println("\nTime synchronization failed.");
-        tft.println("ntp_time not ready");
+        //tft.println("ntp_time not ready");
     }
 }
 

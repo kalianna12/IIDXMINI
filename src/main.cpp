@@ -10,7 +10,24 @@
 #include "my_pn532.h"
 #include "led.h"
 #include "menu.h"
+#include "lv_port_disp.h"
+#include "lvgl_test.h"
 
+static TaskHandle_t lvglTaskHandle = nullptr;
+
+
+/* LVGL 任务 */
+static void lvgl_task(void *pvParameters)
+{
+    (void)pvParameters;
+
+    const TickType_t delay_ticks = pdMS_TO_TICKS(5);
+
+    while (true) {
+        lv_timer_handler();
+        vTaskDelay(delay_ticks);
+    }
+}
 
 inline bool every_ms(uint32_t &last, uint32_t interval)
 {
@@ -55,6 +72,10 @@ void setup() {
     Serial0.println("Serial initialized.");
     
     display_init();
+    lv_init();
+    lv_port_disp_init();
+    
+    
     Serial0.println("Display initialized.");
 
     e6b2_cwz6c_init();
@@ -69,10 +90,20 @@ void setup() {
 
     if(WiFi.status()==WL_CONNECTED) weatherupdate_init();
     LED_Init();
-
-    delay(1000); // 等待一切稳定
     
-       
+    ui_test_perf();
+    /* 创建 LVGL 任务
+       栈大小和优先级可按项目调整 */
+    xTaskCreatePinnedToCore(
+        lvgl_task,          // 任务函数
+        "lvgl_task",        // 名称
+        4096,               // 栈大小
+        nullptr,            // 参数
+        2,                  // 优先级
+        &lvglTaskHandle,    // 任务句柄
+        1                   // 绑定核心，可选 0/1
+    );
+
 }
 
 void loop() {
@@ -110,7 +141,7 @@ void wifi_config_setup()
     if (ssid != "") {
         WiFi.begin(ssid.c_str(), pass.c_str());
         Serial0.print("Connecting to WiFi...");
-        tft.println("Connecting to WiFi...");
+        //tft.println("Connecting to WiFi...");
         int retry = 0;
         while (WiFi.status() != WL_CONNECTED && retry < 20) {
             delay(500);
@@ -121,13 +152,13 @@ void wifi_config_setup()
 
     if (WiFi.status() != WL_CONNECTED) {
         Serial0.println("\nWiFi Failed. Starting AP Mode.");
-        tft.println("\nWiFi Failed. Starting AP Mode.");
+        //tft.println("\nWiFi Failed. Starting AP Mode.");
         wifi_config_init(); // 开启网页配网
         config_mode = true;
     } else {
         Serial0.println("\nWiFi Connected!");
-        tft.println("WiFi Connected!");
-        tft.println("IP: " + WiFi.localIP().toString());
+        //tft.println("WiFi Connected!");
+       // tft.println("IP: " + WiFi.localIP().toString());
         init_ntp_time(); // 初始化 NTP 时间同步
     }
 }
@@ -152,35 +183,39 @@ void hid_init_test()
 {
     if (HID.ready()) {
         Serial0.println("HID ready");
-        tft.setTextColor(ST77XX_WHITE);
-        tft.println("HID ready");
+       // tft.setTextColor(ST77XX_WHITE);
+       // tft.println("HID ready");
         
     } else {
-        tft.setTextColor(ST77XX_WHITE);
-        tft.println("HID not ready");
+       // tft.setTextColor(ST77XX_WHITE);
+        //tft.println("HID not ready");
         Serial0.println("HID not ready");
     }
 }
 
 void display_process() { 
+#if LVGL_ON
+
+#else
   display_drawlines();
   if(every_ms(last_display,100)) display_time();
   display_weather();
   //display_ram();
+#endif
 }
 void display_ram()
 {   
 // getFreeHeap	内部 SRAM (512KB)	~256KB (健康)	决定程序是否会因为逻辑复杂而崩溃。
 // getFreePsram	外部 PSRAM (8MB)	~8.3MB (极充裕)	决定你能否处理巨型图片、长字符串或流畅绘图。
 // getFreeSketchSpace	Flash 存储 (16MB)	视分区表而定	决定你能不能塞进更大、更全的字体文件。
-   tft.fillRect(0,60,320,80,ST77XX_BLACK);
-   tft.setCursor(0,60);
-   tft.setTextSize(2);
-   tft.setTextColor(ST77XX_WHITE); 
-   tft.printf("PSRAM Size: %d bytes\n", ESP.getPsramSize());
-   tft.printf("Free Heap: %d bytes\n", ESP.getFreeHeap());  
-   tft.printf("psram free: %d bytes\n", ESP.getFreePsram());
-   tft.printf("flash free: %d bytes\n", ESP.getFreeSketchSpace());
+//    tft.fillRect(0,60,320,80,ST77XX_BLACK);
+//    tft.setCursor(0,60);
+//    tft.setTextSize(2);
+//    tft.setTextColor(ST77XX_WHITE); 
+//    tft.printf("PSRAM Size: %d bytes\n", ESP.getPsramSize());
+//    tft.printf("Free Heap: %d bytes\n", ESP.getFreeHeap());  
+//    tft.printf("psram free: %d bytes\n", ESP.getFreePsram());
+//    tft.printf("flash free: %d bytes\n", ESP.getFreeSketchSpace());
 
 }
 

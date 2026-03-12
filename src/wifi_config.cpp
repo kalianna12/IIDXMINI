@@ -70,14 +70,14 @@ void wifi_config_handle() {
     if(!is_wifi_display){
         static bool is_wifi_fillscreen=false;
         if(!is_wifi_fillscreen)
-        {tft.fillScreen(ST77XX_BLACK);
+        {//tft.fillScreen(ST77XX_BLACK);
             is_wifi_fillscreen=true;
         }
-        tft.setTextColor(ST77XX_WHITE);
-        tft.setCursor(10,0);
-        tft.setTextSize(2);
-        tft.println("ESP32 12345678");
-        tft.println("search IP address to set wifi");
+        // tft.setTextColor(ST77XX_WHITE);
+        // tft.setCursor(10,0);
+        // tft.setTextSize(2);
+        // tft.println("ESP32 12345678");
+        // tft.println("search IP address to set wifi");
         is_wifi_display=true;
     }
     server.handleClient();

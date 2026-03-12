@@ -6,6 +6,7 @@
 #include <Adafruit_ST7789.h>
 #include <U8g2_for_Adafruit_GFX.h>
 #include <SPI.h>
+#include <lvgl.h>
 
 // 定义显示屏引脚
 #define TFT_SCLK 12
@@ -15,6 +16,7 @@
 #define TFT_DC   14
 #define TFT_RST  9
 #define TFT_BL   21
+#define LVGL_ON 1
 
 // 创建显示屏对象
 extern Adafruit_ST7789 tft;
